@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from librosa import display
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
-data_dir = './audio-folder/ducati'
+data_dir = './audio-folder/yamaha'
 audio_files = glob(data_dir + '/*.wav')
 
 # Read wav
@@ -28,7 +28,7 @@ for i in range(0, len(audio_files), 1):
     ax[0].legend()
     ax[0].label_outer()
     display.specshow(librosa.amplitude_to_db(S, ref=np.max),y_axis='log', x_axis='time', ax=ax[1])
-    ax[1].set(title='log Power spectrogram')
+    ax[1].set(title='Zero crossing rate')
     S = librosa.magphase(librosa.stft(y, window=np.ones, center=False))[0]
     librosa.feature.rms(S=S)
     plt.show()
