@@ -37,7 +37,7 @@ audio_files = glob(data_dir + '/*.wav')
 print(audio_files)
 
 # Read wav
-for i in range(0, len(audio_files), 1):
+for i in range(29, len(audio_files), 1):
     audio_data = audio_files[i]
     y, sr = librosa.load(audio_files[i], sr=22050)
     # print_plot_play(x=x, Fs=Fs, text='WAV file: ')
