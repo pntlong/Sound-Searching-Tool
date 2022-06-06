@@ -11,6 +11,8 @@ import matplotlib
 import numpy as np
 import pandas as pd
 from glob import glob
+import matplotlib.pyplot as plt
+from librosa import display
 
 
 def print_plot_play(x, Fs, text=''):
@@ -32,100 +34,26 @@ def calAverage(arr):
     return sum / length
 
 
-data_dir = './audio-folder/honda'
+data_dir = './audio-folder/yamaha'
 audio_files = glob(data_dir + '/*.wav')
 print(audio_files)
 
 # Read wav
-for i in range(29, len(audio_files), 1):
+for i in range(49, len(audio_files), 1):
     audio_data = audio_files[i]
-    y, sr = librosa.load(audio_files[i], sr=22050)
-    # print_plot_play(x=x, Fs=Fs, text='WAV file: ')
-
-    rms = librosa.feature.rms(y)
-    # print("Average power: ", calAverage(rms[0]))
-
-    zeroXrate = librosa.feature.zero_crossing_rate(y)
-    # print('Zero crossing rate: ', calAverage(zeroXrate[0]))
-
+    y, sr = librosa.load(audio_files[i], sr=44100)
     specCenteroid = librosa.feature.spectral_centroid(y, sr)
-    # print('Spectral centroid: ', calAverage(specCenteroid[0]))
+    S, phase = librosa.magphase(librosa.stft(y=y))
+    freqs, times, D = librosa.reassigned_spectrogram(y, fill_nan=True)
+    librosa.feature.spectral_centroid(S=np.abs(D), freq=freqs)
+    times = librosa.times_like(specCenteroid)
+    fig, ax = plt.subplots()
+    display.specshow(librosa.amplitude_to_db(S, ref=np.max),
+                             y_axis='log', x_axis='time', ax=ax)
+    ax.plot(times, specCenteroid.T, label='Spectral centroid', color='w')
+    ax.legend(loc='upper right')
+    ax.set(title='log Power spectrogram ' + str(i))
+    plt.show()
 
-    bandwidth = librosa.feature.spectral_bandwidth(y, sr)
-    bandwidth = sorted(bandwidth[0])
-    # print('Bandwidth range: ', bandwidth[0], bandwidth[len(bandwidth) - 1])
-    # print('Bandwidth: ', calAverage(bandwidth))
 
-    tempo, beats = librosa.beat.beat_track(y, sr)
-    # print('Tempo: ', tempo)
 
-    file = open("data/honda.txt", "a")  # append mode
-    rms = round(calAverage(rms[0]), 3)
-    zeroXrate = round(calAverage(zeroXrate[0]), 3)
-    specCenteroid = round(calAverage(specCenteroid[0]), 3)
-    bandwidthMin = round(bandwidth[0], 3)
-    bandwidthMax = round(bandwidth[len(bandwidth) - 1], 3)
-    tempo = round(tempo, 3)
-
-    data = "\t" + str(rms) + "\t\t" + str(zeroXrate) + " \t\t" \
-           + str(specCenteroid) + "\t\t" + str(bandwidthMin) + "-" + str(bandwidthMax) + "\t" \
-           + str(tempo) + "\n"
-
-    print()
-    file.write(data)
-    file.close()
-
-    file = open("data/honda.txt", "r")
-    print("Output of Readlines after appending")
-    print(file.readlines())
-    print()
-    file.close()
-
-"""
-audio_data = "audio-folder/Honda Wave S 110 .wav"
-y, sr = librosa.load(audio_data, sr=22050)
-# print_plot_play(x=x, Fs=Fs, text='WAV file: ')
-
-rms = librosa.feature.rms(y)
-print("Average power: ", calAverage(rms[0]))
-
-zeroXrate = librosa.feature.zero_crossing_rate(y)
-print('Zero crossing rate: ', calAverage(zeroXrate[0]))
-
-specCenteroid = librosa.feature.spectral_centroid(y, sr)
-print('Spectral centroid: ', calAverage(specCenteroid[0]))
-
-bandwidth = librosa.feature.spectral_bandwidth(y, sr)
-bandwidth = sorted(bandwidth[0])
-print('Bandwidth range: ', bandwidth[0], bandwidth[len(bandwidth) - 1])
-print('Bandwidth: ', calAverage(bandwidth))
-
-tempo, beats = librosa.beat.beat_track(y, sr)
-print('Tempo: ', tempo)
-
-file = open("data/honda.txt", "a")  # append mode
-rms = round(calAverage(rms[0]), 3)
-zeroXrate = round(calAverage(zeroXrate[0]), 3)
-specCenteroid = round(calAverage(specCenteroid[0]), 3)
-bandwidthMin = round(bandwidth[0], 3)
-bandwidthMax = round(bandwidth[len(bandwidth) - 1],3)
-tempo = round(tempo, 3)
-
-data = "\t"+ str(rms) + "\t\t" + str(zeroXrate) + " \t\t" \
-       + str(specCenteroid) + "\t\t" + str(bandwidthMin) + "-" + str(bandwidthMax) + "\t" \
-       + str(tempo) + "\n"
-
-print()
-file.write(data)
-file.close()
-
-file = open("data/honda.txt", "r")
-print("Output of Readlines after appending")
-print(file.readlines())
-print()
-file.close()
-"""
-# Read mp3
-# fn_mp3 = 'audio-folder/Ducatisound.mp3'
-# x, Fs = librosa.load(fn_mp3, sr=None)
-# print_plot_play(x=x, Fs=Fs, text='MP3 file: ')
