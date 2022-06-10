@@ -13,22 +13,18 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 data_dir = './audio-folder/ducati'
 audio_files = glob(data_dir + '/*.wav')
-
+count = 0
+temp = []
 # Read wav
-for i in range(0, len(audio_files), 1):
-    audio_data = audio_files[i]
+for i in range(0, len(audio_files) - 1):
     y, sr = librosa.load(audio_files[i], sr=44100)
-    zcr = librosa.zero_crossings(y)
-    print(zcr)
-    # fig, ax = plt.subplots(nrows=2, sharex=True)
-    # times = librosa.times_like(zcr)
-    # ax[0].semilogy(times, zcr[0], label='Zero crossing rate')
-    # ax[0].set(xticks=[])
-    # ax[0].legend()
-    # ax[0].label_outer()
-    # ax[1].set(title='Zero crossing rate')
-    # plt.show()
-
-
+    flatness = librosa.feature.spectral_flatness(y)
+    flatness_new = np.ndarray.flatten(flatness)
+    for k in flatness_new:
+        j = k*10*10*10*10
+        temp.append(j)
+    plt.plot(range(1, len(temp) + 1), temp)
+    plt.show()
+    temp = []
 
 
