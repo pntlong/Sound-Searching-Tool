@@ -61,7 +61,8 @@ from numpy.fft import rfft
 #     spec_centroid = librosa.feature.spectral_centroid(y)
 #     averageCentroid = calAverage(spec_centroid[0])
 #     varianCentroid = calVariant(spec_centroid[0])
-#
+#     print(averageCentroid)
+#     break
 #     # compute bandwidth
 #     band_width = librosa.feature.spectral_bandwidth(y)
 #     band_width[0].sort()
@@ -79,22 +80,31 @@ from numpy.fft import rfft
 #     file.write(data)
 #     file.close()
 
-data_dir = './audio-folder/honda'
+data_dir = './audio-folder/yamaha'
 audio_files = glob(data_dir + '/*.wav')
 print(audio_files)
 
-sampling, signal = scipy.io.wavfile.read(audio_files[0])
+sampling, signal = scipy.io.wavfile.read(audio_files[20])
 # sampling, signal = scipy.io.wavfile.read('./audio-folder/yamaha/Bản ghi Mới 3.wav')
 spectrum = abs(rfft(signal))
 # print(signal)
 
+def spectral_centroid(x, samplerate=44100):
+    x = x.flatten()
+    magnitudes = np.abs(np.fft.rfft(x)) # magnitudes of positive frequencies
+    length = len(x)
+    freqs = np.abs(np.fft.fftfreq(length, 1.0/samplerate)[:length//2+1]) # positive frequencies
+    return np.sum(magnitudes*freqs) / np.sum(magnitudes) # return weighted mean
+
 def CalSpectralCentroid( signal ):
-    spectrum = abs(rfft(signal))
+    signalFlatten = signal.flatten()
+    spectrum = abs(rfft(signalFlatten))
     normalized_spectrum = spectrum / sum(spectrum)
     normalized_frequencies = linspace(0, 1, len(spectrum))
     spectral_centroid = sum(normalized_frequencies * normalized_spectrum)
     return spectral_centroid
-def CalFrequency(signal):
+
+def CalFrequency( signal ):
     FFT = abs(scipy.fft.fft(signal))
     freqs = scipy.fft.fftfreq(len(FFT), (1.0 / sampling))
     frequency = freqs[range(len(FFT) // 2)]
@@ -103,18 +113,22 @@ def CalFrequency(signal):
     plt.ylabel('Amplitude')
     # plt.show()
     return frequency
-def CalFFTSignal(signal):
+
+def CalFFTSignal( signal ):
     FFT = abs(scipy.fft.fft(signal))
     flattenFFT = FFT.flatten()
     return flattenFFT
-def CalRMS(arrM):
-    arr = arrM.flatten()
-    rms = 0
+
+def CalRMS(signal):
+    arr = signal.flatten()
+    rms = np.prod(arr.astype(np.float64))
     for i in arr:
         rms += pow(i,2)
     return round((rms/(len(arr))),4)
-def CalZCR(arr):
+
+def CalZCR(signal):
     count = 0
+    arr = signal.flatten()
     for i in range(0,len(arr)-1):
         if arr[i] < 0:
             arr[i] = -1
@@ -125,7 +139,9 @@ def CalZCR(arr):
     for i in range(1,len(arr)):
         count += abs(arr[i] - arr[i-1])
     return round((count/(2*len(arr))),5)
-print(CalRMS(signal))
+# print('RMS : ')
+print(spectral_centroid(signal))
+print(CalSpectralCentroid(signal)*2)
 
 # data_dir = './audio-folder/honda'
 # audio_files = glob(data_dir + '/*.wav')
@@ -133,7 +149,7 @@ print(CalRMS(signal))
 
 # rate, aud_data = scipy.io.wavfile.read(file)
 # sampling, signal = scipy.io.wavfile.read(audio_files[0])
-print(CalFrequency(signal))
+# print(CalFrequency(signal))
 
 length = signal.shape[0] / sampling
 time = np.linspace(0, length, signal.shape[0])
