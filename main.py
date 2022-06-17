@@ -3,8 +3,9 @@ import numpy
 import numpy as np
 from glob import glob
 
-import scipy
-from numpy import linspace
+import scipy.fft
+from numpy import linspace, arange
+from scipy.fft import fft
 from scipy.io import wavfile
 from matplotlib import pyplot as plt
 from numpy.fft import rfft
@@ -78,7 +79,12 @@ from numpy.fft import rfft
 #     file.write(data)
 #     file.close()
 
-sampling, signal = scipy.io.wavfile.read('./audio-folder/yamaha/Bản ghi Mới 3.wav')
+data_dir = './audio-folder/honda'
+audio_files = glob(data_dir + '/*.wav')
+print(audio_files)
+
+sampling, signal = scipy.io.wavfile.read(audio_files[0])
+# sampling, signal = scipy.io.wavfile.read('./audio-folder/yamaha/Bản ghi Mới 3.wav')
 spectrum = abs(rfft(signal))
 # print(signal)
 
@@ -88,7 +94,15 @@ def CalSpectralCentroid( signal ):
     normalized_frequencies = linspace(0, 1, len(spectrum))
     spectral_centroid = sum(normalized_frequencies * normalized_spectrum)
     return spectral_centroid
-
+def CalFrequency(signal):
+    FFT = abs(scipy.fft.fft(signal))
+    freqs = scipy.fft.fftfreq(len(FFT), (1.0 / sampling))
+    frequency = freqs[range(len(FFT) // 2)]
+    plt.plot(frequency, FFT[range(len(FFT) // 2)])
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Amplitude')
+    # plt.show()
+    return frequency
 def CalFFTSignal(signal):
     FFT = abs(scipy.fft.fft(signal))
     flattenFFT = FFT.flatten()
@@ -112,3 +126,48 @@ def CalZCR(arr):
         count += abs(arr[i] - arr[i-1])
     return round((count/(2*len(arr))),5)
 print(CalRMS(signal))
+
+# data_dir = './audio-folder/honda'
+# audio_files = glob(data_dir + '/*.wav')
+# print(audio_files)
+
+# rate, aud_data = scipy.io.wavfile.read(file)
+# sampling, signal = scipy.io.wavfile.read(audio_files[0])
+print(CalFrequency(signal))
+
+length = signal.shape[0] / sampling
+time = np.linspace(0, length, signal.shape[0])
+plt.plot(time, signal)
+plt.xlabel("Time (s)")
+plt.ylabel("Amplitude")
+plt.title("Original signal")
+# plt.show()
+
+
+def frequency_spectrum(x, sf):
+    """
+    Derive frequency spectrum of a signal from time domain
+    :param x: signal in the time domain
+    :param sf: sampling frequency
+    :returns frequencies and their content distribution
+    """
+    x = x - np.average(x)  # zero-centering
+
+    n = len(x)
+    k = arange(n)
+    tarr = n / float(sf)
+    frqarr = k / float(tarr)  # two sides frequency range
+
+    frqarr = frqarr[range(n // 2)]  # one side frequency range
+
+    x = fft(x) / n # fft computing and normalization
+    x = x[range(n // 2)]
+
+    return frqarr, abs(x)
+
+# frq, X = frequency_spectrum(signal, 1.0/sampling)
+# print('x', X)
+# plt.plot(frq, X,  'b')
+# plt.xlabel('Freq (Hz)')
+# plt.ylabel('|X(freq)|')
+# plt.show()
