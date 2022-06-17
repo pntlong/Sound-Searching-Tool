@@ -1,33 +1,114 @@
-import os
 import librosa
-# import librosa.display as dsp
-# from IPython.display import Audio as ipd
-# from IPython.lib.display import Audio
-# import matplotlib
+import numpy
 import numpy as np
-import pandas as pd
 from glob import glob
-import matplotlib.pyplot as plt
-from librosa import display
 
-data_dir = './audio-folder/honda'
-audio_files = glob(data_dir + '/*.wav')
-count = 0
-temp = []
-# Read wav
-for i in range(0, len(audio_files) - 1):
-    y, sr = librosa.load(audio_files[5], sr=44100)
-    centroid = librosa.feature.spectral_centroid(y, sr=sr)[0]
-    print(centroid)
-    print(len(centroid))
-    break
-    # flatness = librosa.feature.spectral_flatness(y)
-    # flatness_new = np.ndarray.flatten(flatness)
-    # for k in flatness_new:
-    #     j = k*10*10*10*10
-    #     temp.append(j)
-    # plt.plot(range(1, len(temp) + 1), temp)
-    # plt.show()
-    # temp = []
+import scipy
+from numpy import linspace
+from scipy.io import wavfile
+from matplotlib import pyplot as plt
+from numpy.fft import rfft
 
+# sampFreq, sound = wavfile.read('./audio-folder/ducati/Ducati sound(31).wav')
+# signal = sound[:,0]
+# fft_spectrum = np.fft.rfft(signal)
+# freq = np.fft.rfftfreq(signal.size, d=1./sampFreq)
+# fft_spectrum_abs = np.abs(fft_spectrum)
+# plt.plot(freq[:3000], np.abs(fft_spectrum[:3000]))
+# plt.xlabel("frequency, Hz")
+# plt.ylabel("Amplitude, units")
+# plt.show()
+# length = sound.shape[0]/sampFreq
+# time = np.linspace,length,sound.shape[0]
+# plt.plot( range(1, len(fft_spectrum_abs)+1) , fft_spectrum_abs)
+# plt.show()
 
+# data_dir = './audio-folder/yamaha'
+# audio_files = glob(data_dir + '/*.wav')
+# def calZCR (zcr ) :
+#     count = 0
+#     for j in range(0, len(zcr) - 1):
+#         if zcr[j] != zcr[j+1]:
+#             count += 1
+#     zcrnew = round((count/len(zcr)),2)
+#     return zcrnew
+# def calAverage(arr):
+#     sum = np.sum(arr)
+#     length = len(arr)
+#     return round((sum / length),2)
+# def calVariant(arr) :
+#     average = calAverage(arr)
+#     temp = 0
+#     for i in arr:
+#         temp += pow((i - average),2)
+#     variant = round((temp / (len(arr))),2)
+#     return variant
+# # Read wav
+# for i in range(0, len(audio_files), 1):
+#     audio_data = audio_files[10]
+#     y, sr = librosa.load(audio_files[i], sr=44100)
+#
+#     # compute rms
+#     rms = librosa.feature.rms(y)
+#     root_mean_squared = calAverage(rms)
+#
+#     # compute zcr
+#     zcr = librosa.zero_crossings(y)
+#     zero_crossing_rate = calZCR(zcr)
+#
+#     # compute spec_centroid
+#     spec_centroid = librosa.feature.spectral_centroid(y)
+#     averageCentroid = calAverage(spec_centroid[0])
+#     varianCentroid = calVariant(spec_centroid[0])
+#
+#     # compute bandwidth
+#     band_width = librosa.feature.spectral_bandwidth(y)
+#     band_width[0].sort()
+#     minBandWidth = round(band_width[0][0],2)
+#     maxBandWidth = round(band_width[0][len(band_width[0]) - 1],2)
+#
+#     # compute tempo
+#     tempo_read_file = librosa.beat.tempo(y)
+#     tempoReal = round(tempo_read_file[0],2)
+#     # write to file
+#     file = open("data/yamaha.txt", "a")
+#     data = str(root_mean_squared) + "," + "\t\t" + str(zero_crossing_rate) + "," + "\t\t" + str(averageCentroid) + "," + "\t\t" + str(varianCentroid) \
+#             + "," + "\t\t" + str(minBandWidth) + "," + "\t\t" + str(maxBandWidth) + "," + "\t\t" + str(tempoReal) + "\n"
+#     print()
+#     file.write(data)
+#     file.close()
+
+sampling, signal = scipy.io.wavfile.read('./audio-folder/yamaha/Bản ghi Mới 3.wav')
+spectrum = abs(rfft(signal))
+# print(signal)
+
+def CalSpectralCentroid( signal ):
+    spectrum = abs(rfft(signal))
+    normalized_spectrum = spectrum / sum(spectrum)
+    normalized_frequencies = linspace(0, 1, len(spectrum))
+    spectral_centroid = sum(normalized_frequencies * normalized_spectrum)
+    return spectral_centroid
+
+def CalFFTSignal(signal):
+    FFT = abs(scipy.fft.fft(signal))
+    flattenFFT = FFT.flatten()
+    return flattenFFT
+def CalRMS(arrM):
+    arr = arrM.flatten()
+    rms = 0
+    for i in arr:
+        rms += pow(i,2)
+    return round((rms/(len(arr))),4)
+def CalZCR(arr):
+    count = 0
+    for i in range(0,len(arr)-1):
+        if arr[i] < 0:
+            arr[i] = -1
+        elif arr[i] == 0:
+            arr[i] = 0
+        else:
+            arr[i] = 1
+    for i in range(1,len(arr)):
+        count += abs(arr[i] - arr[i-1])
+    return round((count/(2*len(arr))),5)
+print(CalRMS(signal))
