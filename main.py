@@ -20,14 +20,6 @@ def spectral_centroid(x, samplerate=44100):
     freqs = np.abs(np.fft.fftfreq(length, 1.0/samplerate)[:length//2+1]) # positive frequencies
     return np.sum(magnitudes*freqs) / np.sum(magnitudes) # return weighted mean
 
-def calSpectralCentroid( signal ):
-    signalFlatten = signal.flatten()
-    spectrum = abs(rfft(signalFlatten))
-    normalized_spectrum = spectrum / sum(spectrum)
-    normalized_frequencies = linspace(0, 1, len(spectrum))
-    spectral_centroid = sum(normalized_frequencies * normalized_spectrum)
-    return spectral_centroid
-
 def calFrequency( signal ):
     FFT = abs(scipy.fft.fft(signal))
     freqs = scipy.fft.fftfreq(len(FFT), (1.0 / sampling))
@@ -35,7 +27,6 @@ def calFrequency( signal ):
     plt.plot(frequency, FFT[range(len(FFT) // 2)])
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude')
-    # plt.show()
     return frequency
 
 def calFFTSignal( signal ):
@@ -64,10 +55,14 @@ def calZCR(signal):
         count += abs(arr[i] - arr[i-1])
     return round((count/(2*len(arr))),5)
 
-
+length = signal.shape[0] / sampling
+time = np.linspace(0, length, signal.shape[0])
+plt.plot(time, signal)
+plt.xlabel("Time (s)")
+plt.ylabel("Amplitude")
+plt.title("Original signal")
 def frequency_spectrum(x, sf):
     x = x - np.average(x)  # zero-centering
-
     n = len(x)
     k = arange(n)
     tarr = n / float(sf)
@@ -83,7 +78,6 @@ def frequency_spectrum(x, sf):
 def calBandwidth(signal, sampling):
     freq, power = frequency_spectrum(signal,sampling)
     freq.sort()
-    # print('freq', freq)
     minBandWidth = round(freq[0],2)
     maxBandWidth = round(freq[len(freq) - 1],2)
     return minBandWidth, maxBandWidth
