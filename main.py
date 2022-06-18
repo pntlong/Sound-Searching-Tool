@@ -10,14 +10,8 @@ from scipy.io import wavfile
 from matplotlib import pyplot as plt
 from numpy.fft import rfft
 
-data_dir = './audio-folder/yamaha'
+data_dir = './audio-folder/ducati'
 audio_files = glob(data_dir + '/*.wav')
-print(audio_files)
-
-sampling, signal = scipy.io.wavfile.read(audio_files[0])
-# sampling, signal = scipy.io.wavfile.read('./audio-folder/yamaha/Bản ghi Mới 3.wav')
-spectrum = abs(rfft(signal))
-# print(signal)
 
 def spectral_centroid(x, samplerate=44100):
     x = x.flatten()
@@ -72,12 +66,6 @@ def calZCR(signal):
 
 
 def frequency_spectrum(x, sf):
-    """
-    Derive frequency spectrum of a signal from time domain
-    :param x: signal in the time domain
-    :param sf: sampling frequency
-    :returns frequencies and their content distribution
-    """
     x = x - np.average(x)  # zero-centering
 
     n = len(x)
@@ -116,18 +104,6 @@ def plotPowerInFrequency(signal, sampling):
     plt.ylabel('|X(freq)|')
     plt.show()
 
-# print('RMS : ')
-# print(spectral_centroid(signal))
-# print(CalSpectralCentroid(signal)*2)
-
-# data_dir = './audio-folder/honda'
-# audio_files = glob(data_dir + '/*.wav')
-# print(audio_files)
-
-# rate, aud_data = scipy.io.wavfile.read(file)
-# sampling, signal = scipy.io.wavfile.read(audio_files[0])
-# print(CalFrequency(signal))
-
 def processApp():
     file = input("Enter audio file: ")
     sampling, signal = scipy.io.wavfile.read(file)
@@ -135,9 +111,9 @@ def processApp():
 
 for i in range(0, len(audio_files), 1):
     sampling, signal = scipy.io.wavfile.read(audio_files[i])
-    file = open("data/yamaha.txt", "a")  # append mode
+    file = open("data/ducati.txt", "a")  # append mode
     data = "\t" + str(calAvgPower(signal)) + "\t\t" + str(calZCR(signal)) + " \t\t" \
-           + str(calSpectralCentroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
+           + str(spectral_centroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
     file.write(data)
     file.close()
 
