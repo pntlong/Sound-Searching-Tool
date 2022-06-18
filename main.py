@@ -54,13 +54,6 @@ def calZCR(signal):
     for i in range(1,len(arr)):
         count += abs(arr[i] - arr[i-1])
     return round((count/(2*len(arr))),5)
-
-length = signal.shape[0] / sampling
-time = np.linspace(0, length, signal.shape[0])
-plt.plot(time, signal)
-plt.xlabel("Time (s)")
-plt.ylabel("Amplitude")
-plt.title("Original signal")
 def frequency_spectrum(x, sf):
     """
     Derive frequency spectrum of a signal from time domain
@@ -113,7 +106,7 @@ for i in range(0, len(audio_files), 1):
     sampling, signal = scipy.io.wavfile.read(audio_files[i])
     file = open("data/yamaha.txt", "a")  # append mode
     data = "\t" + str(calAvgPower(signal)) + "\t\t" + str(calZCR(signal)) + " \t\t" \
-           + str(calSpectralCentroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
+           + str(spectral_centroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
     file.write(data)
     file.close()
 
