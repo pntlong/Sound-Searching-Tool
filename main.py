@@ -10,7 +10,7 @@ from scipy.io import wavfile
 from matplotlib import pyplot as plt
 from numpy.fft import rfft
 
-data_dir = './audio-folder/honda'
+data_dir = './audio-folder/yamaha'
 audio_files = glob(data_dir + '/*.wav')
 print(audio_files)
 
@@ -26,7 +26,7 @@ def spectral_centroid(x, samplerate=44100):
     freqs = np.abs(np.fft.fftfreq(length, 1.0/samplerate)[:length//2+1]) # positive frequencies
     return np.sum(magnitudes*freqs) / np.sum(magnitudes) # return weighted mean
 
-def CalSpectralCentroid( signal ):
+def calSpectralCentroid( signal ):
     signalFlatten = signal.flatten()
     spectrum = abs(rfft(signalFlatten))
     normalized_spectrum = spectrum / sum(spectrum)
@@ -34,7 +34,7 @@ def CalSpectralCentroid( signal ):
     spectral_centroid = sum(normalized_frequencies * normalized_spectrum)
     return spectral_centroid
 
-def CalFrequency( signal ):
+def calFrequency( signal ):
     FFT = abs(scipy.fft.fft(signal))
     freqs = scipy.fft.fftfreq(len(FFT), (1.0 / sampling))
     frequency = freqs[range(len(FFT) // 2)]
@@ -44,19 +44,19 @@ def CalFrequency( signal ):
     # plt.show()
     return frequency
 
-def CalFFTSignal( signal ):
+def calFFTSignal( signal ):
     FFT = abs(scipy.fft.fft(signal))
     flattenFFT = FFT.flatten()
     return flattenFFT
 
-def CalAvgPower(signal):
+def calAvgPower(signal):
     arr = signal.flatten()
-    rms = np.prod(arr.astype(np.float64))
+    rms = 0.0
     for i in arr:
         rms += pow(i,2)
     return round((rms/(len(arr))),4)
 
-def CalZCR(signal):
+def calZCR(signal):
     count = 0
     arr = signal.flatten()
     for i in range(0,len(arr)-1):
@@ -92,10 +92,10 @@ def frequency_spectrum(x, sf):
 
     return frqarr, abs(x)
 
-def CalBandwidth(signal, sampling):
+def calBandwidth(signal, sampling):
     freq, power = frequency_spectrum(signal,sampling)
     freq.sort()
-    print('freq', freq)
+    # print('freq', freq)
     minBandWidth = round(freq[0],2)
     maxBandWidth = round(freq[len(freq) - 1],2)
     return minBandWidth, maxBandWidth
@@ -132,4 +132,13 @@ def processApp():
     file = input("Enter audio file: ")
     sampling, signal = scipy.io.wavfile.read(file)
     plotPowerInTime(signal, sampling)
+
+for i in range(0, len(audio_files), 1):
+    sampling, signal = scipy.io.wavfile.read(audio_files[i])
+    file = open("data/yamaha.txt", "a")  # append mode
+    data = "\t" + str(calAvgPower(signal)) + "\t\t" + str(calZCR(signal)) + " \t\t" \
+           + str(calSpectralCentroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
+    file.write(data)
+    file.close()
+
 
