@@ -8,7 +8,6 @@ from scipy.io import wavfile
 from matplotlib import pyplot as plt
 from numpy.fft import rfft
 
-#./audio-folder/ducati/Ducati Panigale V4 Speciale Sound Check Akrapovic full Titanium Racing Exhaust (mp3cut.net) (1).wav
 data_dir = './audio-folder/honda'
 audio_files = glob(data_dir + '/*.wav')
 lenAudioFile = len(audio_files)
@@ -18,21 +17,6 @@ yamahaCentral = [3740977.917, 0.042, 3078.08, 0, 22049.742]
 maxDistanceYamaha = 13825172.380770255
 maxDistanceHonda = 168620860.68438935
 maxDistanceDucati = 214900453.3454481
-def spectral_centroid(x, sampling):
-    x = x.flatten()
-    magnitudes = np.abs(np.fft.rfft(x))
-    length = len(x)
-    freqs = np.abs(np.fft.fftfreq(length, 1.0/sampling)[:length//2+1])
-    return np.sum(magnitudes*freqs) / np.sum(magnitudes)
-
-def calFrequency( signal, sampling ):
-    FFT = abs(scipy.fft.fft(signal))
-    freqs = scipy.fft.fftfreq(len(FFT), (1.0 / sampling))
-    frequency = freqs[range(len(FFT) // 2)]
-    plt.plot(frequency, FFT[range(len(FFT) // 2)])
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('Amplitude')
-    return frequency
 
 def calFFTSignal( signal ):
     FFT = abs(scipy.fft.fft(signal))
@@ -58,7 +42,7 @@ def calZCR(signal):
             arr[i] = 1
     for i in range(1,len(arr)):
         count += abs(arr[i] - arr[i-1])
-    return round((count/(2*len(arr))),5)
+    return round((count/(2*len(arr))),4)
 
 def frequency_spectrum(x, sf):
     x = x - np.average(x)  # zero-centering
@@ -66,13 +50,16 @@ def frequency_spectrum(x, sf):
     k = arange(n)
     tarr = n / float(sf)
     frqarr = k / float(tarr)  # two sides frequency range
-
     frqarr = frqarr[range(n // 2)]  # one side frequency range
-
     x = fft(x) / n # fft computing and normalization
     x = x[range(n // 2)]
-
     return frqarr, abs(x)
+
+def spectral_centroid(x, sampling):
+    x = x.flatten()
+    freqs, y = frequency_spectrum(x, sampling)
+    return np.sum(y*freqs) / np.sum(y)
+
 
 def calDistance(feature, central):
     tempDistance = 0.0
@@ -110,15 +97,19 @@ def processApp():
     distanceYamaha = 0.0
     distanceDucati = 0.0
     file = input("Enter audio file: ")
+    if(file[(len(file) - 4):] != '.wav'):
+        print('Incorrect file type!!!')
+        return
     sampling, signal = scipy.io.wavfile.read(file)
-    minBandwidth, maxBandwidth = calBandwidth(signal, sampling)
-    featureAudio.extend([calAvgPower(signal), calZCR(signal), spectral_centroid(signal,sampling), minBandwidth, maxBandwidth])
+    # print(sampling, len(signal))
+    minFreq, maxFreq = calBandwidth(signal, sampling)
+    featureAudio.extend([calAvgPower(signal), calZCR(signal), spectral_centroid(signal,sampling), minFreq, maxFreq])
     for i in range(0, len(featureAudio) - 1):
         distanceHonda += pow((featureAudio[i] - hondaCentral[i]),2)
         distanceDucati += pow((featureAudio[i] - ducatiCentral[i]), 2)
         distanceYamaha += pow((featureAudio[i] - yamahaCentral[i]),2)
     distanceHonda = sqrt(distanceHonda)
-    # print('Khoang cach den tam cua cum Honda la : ' + str(distanceHonda))
+    # print('Khoang cach den tam cua cum Honda la : ' + sr(distanceHonda))
     distanceYamaha = sqrt(distanceYamaha)
     # print('Khoang cach den tam cua cum Yamaha la : ' + str(distanceYamaha))
     distanceDucati = sqrt(distanceDucati)
@@ -139,7 +130,6 @@ def processApp():
         if (minDistance < abs(maxDistanceHonda)):
             print('Hang cua xe la : Honda')
         else:print('Khong thuoc 3 hang xe tren')
-    # print(minDistance)
     # plotPowerInTime(signal, sampling)
 def calCentral(arrFeature ):
     tempZCR = 0.0
