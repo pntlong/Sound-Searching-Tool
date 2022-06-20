@@ -101,7 +101,6 @@ def processApp():
         print('Incorrect file type!!!')
         return
     sampling, signal = scipy.io.wavfile.read(file)
-    # print(sampling, len(signal))
     minFreq, maxFreq = calBandwidth(signal, sampling)
     featureAudio.extend([calAvgPower(signal), calZCR(signal), spectral_centroid(signal,sampling), minFreq, maxFreq])
     for i in range(0, len(featureAudio) - 1):
@@ -163,3 +162,14 @@ processApp()
     # file.close()
 
 # print(distance)
+#     plotPowerInTime(signal, sampling)
+
+for i in range(0, len(audio_files), 1):
+    sampling, signal = scipy.io.wavfile.read(audio_files[i])
+    file = open("data/ducati.txt", "a")  # append mode
+    data = "\t" + str(calAvgPower(signal)) + "\t\t" + str(calZCR(signal)) + " \t\t" \
+           + str(spectral_centroid(signal)) + "\t\t" + str(calBandwidth(signal,sampling)) + "\n"
+    file.write(data)
+    file.close()
+
+
